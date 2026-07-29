@@ -1,5 +1,7 @@
 "use client";
 
+import { useCreateNote } from "@/features/notes/hooks/useCreateNote";
+import { useDeleteNote } from "@/features/notes/hooks/useDeleteNote";
 import { useNotes } from "@/features/notes/hooks/useNotes";
 import { useEffect, useState } from "react";
 
@@ -19,9 +21,34 @@ const emptyForm = (): NoteForm => ({ title: "", content: "" });
 
 export default function Home() {
   // const [notes, setNotes] = useState<Note[]>([]);
-  const [form, setForm] = useState<NoteForm>(emptyForm());
+  // const [form, setForm] = useState<NoteForm>(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [form, setForm] = useState({ title: "", content: "" });
+
+  const { mutate, isPending, isError } = useCreateNote();
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!form.title.trim() || !form.content.trim()) return;
+
+    mutate(form, {
+      onSuccess: () => {
+        setForm({ title: "", content: "" });
+      },
+    });
+  };
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("notes-theme");
@@ -59,52 +86,57 @@ export default function Home() {
   //   window.localStorage.setItem("notes", JSON.stringify(notes));
   // }, [notes]);
 
-  const { data: notes, isLoading, error } = useNotes();
+  const { data: notes, isLoading, error, isFetching } = useNotes();
+  const { mutate: deleteNote } = useDeleteNote();
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex justify-center align-middle p-6">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   if (error) {
     return <p>Something went wrong.</p>;
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
 
-    if (!form.title.trim() && !form.content.trim()) {
-      return;
-    }
+  //   if (!form.title.trim() && !form.content.trim()) {
+  //     return;
+  //   }
 
-    const now = new Date().toISOString();
+  //   const now = new Date().toISOString();
 
-    // if (editingId) {
-    //   setNotes((currentNotes) =>
-    //     currentNotes.map((note) =>
-    //       note.id === editingId
-    //         ? {
-    //             ...note,
-    //             title: form.title.trim(),
-    //             content: form.content.trim(),
-    //             updatedAt: now,
-    //           }
-    //         : note,
-    //     ),
-    //   );
-    // } else {
-    //   const newNote: Note = {
-    //     id: crypto.randomUUID(),
-    //     title: form.title.trim(),
-    //     content: form.content.trim(),
-    //     updatedAt: now,
-    //   };
+  //   // if (editingId) {
+  //   //   setNotes((currentNotes) =>
+  //   //     currentNotes.map((note) =>
+  //   //       note.id === editingId
+  //   //         ? {
+  //   //             ...note,
+  //   //             title: form.title.trim(),
+  //   //             content: form.content.trim(),
+  //   //             updatedAt: now,
+  //   //           }
+  //   //         : note,
+  //   //     ),
+  //   //   );
+  //   // } else {
+  //   //   const newNote: Note = {
+  //   //     id: crypto.randomUUID(),
+  //   //     title: form.title.trim(),
+  //   //     content: form.content.trim(),
+  //   //     updatedAt: now,
+  //   //   };
 
-    //   setNotes((currentNotes) => [newNote, ...currentNotes]);
-    // }
+  //   //   setNotes((currentNotes) => [newNote, ...currentNotes]);
+  //   // }
 
-    setForm(emptyForm());
-    setEditingId(null);
-  };
+  //   setForm(emptyForm());
+  //   setEditingId(null);
+  // };
 
   const startEditing = (note: Note) => {
     setEditingId(note.id);
@@ -151,8 +183,8 @@ export default function Home() {
     ? "rounded-full border border-white/10 px-3 py-1 text-sm text-slate-300"
     : "rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600";
   const buttonClasses = isDark
-    ? "rounded-full border border-white/15 px-3 py-1.5 text-sm text-slate-300 transition hover:bg-white/10"
-    : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100";
+    ? "rounded-full border border-white/15 px-3 py-1.5 text-sm text-slate-300 transition hover:bg-white/10 cursor-pointer"
+    : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100 cursor-pointer";
   const actionButtonClasses = isDark
     ? "rounded-full border border-cyan-400/40 px-3 py-1 text-sm text-cyan-300 transition hover:bg-cyan-400/10"
     : "rounded-full border border-cyan-500/40 px-3 py-1 text-sm text-cyan-600 transition hover:bg-cyan-50";
@@ -187,7 +219,7 @@ export default function Home() {
                   currentTheme === "dark" ? "light" : "dark",
                 )
               }
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
+              className={`rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
             >
               {isDark ? "☀️ Light" : "🌙 Dark"}
             </button>
@@ -212,37 +244,35 @@ export default function Home() {
 
           <div className="space-y-4">
             <input
+              name="title"
               value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  title: event.target.value,
-                }))
-              }
+              onChange={handleChange}
               placeholder="Note title"
               className={inputClasses}
+              disabled={isPending}
             />
             <textarea
+              name="content"
               value={form.content}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  content: event.target.value,
-                }))
-              }
+              onChange={handleChange}
               placeholder="Write your note here..."
               rows={5}
               className={inputClasses}
+              disabled={isPending}
             />
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               type="submit"
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${isDark ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400" : "bg-cyan-600 text-white hover:bg-cyan-500"}`}
+              disabled={isPending}
+              className={`rounded-full px-4 py-2 text-sm cursor-pointer font-semibold transition ${isDark ? "bg-cyan-500 text-slate-950 hover:bg-cyan-400" : "bg-cyan-600 text-white hover:bg-cyan-500"}`}
             >
-              {editingId ? "Save changes" : "Create note"}
+              {isPending ? "Saving note..." : "Save Note"}
             </button>
+            {isError && (
+              <p className="text-red-500 text-sm">Failed to save note.</p>
+            )}
             <button
               type="button"
               onClick={() => setForm(emptyForm())}
@@ -256,14 +286,28 @@ export default function Home() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Your notes</h2>
-            {/* <span className={pillClasses}>
-              {notes.length} {notes.length === 1 ? "note" : "notes"}
-            </span> */}
+            {isFetching && (
+              <span className="text-md text-gray-400 animate-pulse">
+                (Refreshing...)
+              </span>
+            )}
+            <span className={pillClasses}>
+              {notes?.length} {notes?.length === 1 ? "note" : "notes"}
+            </span>
           </div>
 
           {notes?.map((note) => (
             <div key={note.id} className="border rounded-lg p-4 mb-4">
-              <h2 className="font-bold">{note.title}</h2>
+              <div className="flex flex-row justify-between">
+                <h2 className="font-bold">{note.title}</h2>
+                <button
+                  onClick={() => deleteNote(note.id)}
+                  className="mt-4 text-xs font-medium text-red-600 hover:text-red-800 cursor-pointer text-left self-start
+                "
+                >
+                  Delete Note
+                </button>
+              </div>
               <p>{note.content}</p>
               <small>{note.createdAt}</small>
             </div>
