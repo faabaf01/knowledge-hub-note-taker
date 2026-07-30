@@ -43,12 +43,12 @@ export default function Home() {
 
     if (!form.title.trim() || !form.content.trim()) return;
 
-    mutate(form, {
-      onSuccess: () => {
-        setForm({ title: "", content: "" });
-      },
-    });
-  };
+    // 1. Submit payload to trigger the onMutate instant cache pipeline
+    mutate(form);
+
+    // 2. Clear local form inputs immediately
+    setForm({ title: "", content: "" });
+  };;
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("notes-theme");
@@ -296,22 +296,40 @@ export default function Home() {
             </span>
           </div>
 
-          {notes?.map((note) => (
-            <div key={note.id} className="border rounded-lg p-4 mb-4">
-              <div className="flex flex-row justify-between">
-                <h2 className="font-bold">{note.title}</h2>
-                <button
-                  onClick={() => deleteNote(note.id)}
-                  className="mt-4 text-xs font-medium text-red-600 hover:text-red-800 cursor-pointer text-left self-start
-                "
-                >
-                  Delete Note
-                </button>
+          {notes?.map((note) => {
+            const isOptimistic = note.id.startsWith("temp-");
+            return (
+              <div
+                key={note.id}
+                className={`border rounded-lg p-4 mb-4 ${
+                  isOptimistic
+                    ? "opacity-50 border-dashed border-blue-400"
+                    : "opacity-100"
+                }`}
+              >
+                <div className="flex flex-row justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      {isOptimistic && (
+                        <p className="text-md text-blue-400 font-medium">
+                          Saving note...
+                        </p>
+                      )}
+                    </div>
+                    <h2 className="font-semibold">{note.title}</h2>
+                    <p>{note.content}</p>
+                  </div>
+                  <button
+                    onClick={() => deleteNote(note.id)}
+                    disabled={isOptimistic} // prevent deleting an item that hasn't saved yet
+                    className="mt-4 text-xs font-medium text-red-600 hover:text-red-800 cursor-pointer disabled:text-gray-300"
+                  >
+                    Delete Note
+                  </button>
+                </div>
               </div>
-              <p>{note.content}</p>
-              <small>{note.createdAt}</small>
-            </div>
-          ))}
+            );
+          })}
           {/* {notes.length === 0 ? (
             <div className={emptyStateClasses}>
               No notes yet. Start by creating one.
