@@ -51,3 +51,16 @@ export async function deleteNoteApi(id: string): Promise<string> {
     }, 1000); // 1 second delay to see the instant UI change
   });
 }
+
+export async function updateNoteApi(updatedNote: Note): Promise<Note> {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const index = fakeNotes.findIndex((note) => note.id === updatedNote.id);
+      if (index === -1) {
+        return reject(new Error("Note not found in database."));
+      }
+      fakeNotes[index] = updatedNote;
+      resolve(updatedNote);
+    }, 800);
+  });
+}
