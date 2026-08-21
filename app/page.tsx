@@ -4,6 +4,7 @@ import { useCreateNote } from "@/features/notes/hooks/useCreateNote";
 import { useNotes } from "@/features/notes/hooks/useNotes";
 import { useEffect, useState } from "react";
 import NoteCard from "./components/NoteCard";
+import { PuffLoader, FadeLoader, ClipLoader } from "react-spinners";
 
 type NoteForm = {
   title: string;
@@ -78,17 +79,17 @@ export default function Home() {
 
   const { data: notes, isLoading, error, isFetching } = useNotes();
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center align-middle p-6">
-        <p>Loading...</p>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center align-middle p-6">
+  //       <p>Loading...</p>
+  //     </div>
+  //   );
+  // }
 
-  if (error) {
-    return <p>Something went wrong.</p>;
-  }
+  // if (error) {
+  //   return <p>Something went wrong.</p>;
+  // }
 
   const isDark = theme === "dark";
   const shellClasses = isDark
@@ -200,19 +201,27 @@ export default function Home() {
           </div>
         </form>
 
-        <section className="space-y-4">
+        <section className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Your notes</h2>
-            {isFetching && (
-              <span className="text-md text-gray-400 animate-pulse">
-                (Syncing...)
-              </span>
-            )}
             <span className={pillClasses}>
               {notes?.length} {notes?.length === 1 ? "note" : "notes"}
             </span>
           </div>
 
+          {isFetching && (
+            <div className="flex justify-center align-middle p-6 gap-2">
+              <PuffLoader color={isDark ? "#ffffff" : "#000000"} size={30} />
+              <p className="text-gray-500">Loading...</p>
+            </div>
+          )}
+          {error && (
+            <div className="flex justify-center align-middle p-6">
+              <p className="text-gray-500">
+                Something went wrong! Please try again later.
+              </p>
+            </div>
+          )}
           {notes?.length === 0 ? (
             <div className={emptyStateClasses}>
               No notes yet. Start by creating one.
@@ -220,7 +229,13 @@ export default function Home() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {notes?.map((note) => {
-                return <NoteCard key={note.id} note={note} />;
+                return (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    cardClasses={cardClasses}
+                  />
+                );
               })}
             </div>
           )}

@@ -14,7 +14,7 @@ export default function QueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60,
+            staleTime: 1000 * 60, // data stays fresh for 1 minute and will not be refetched
           },
         },
       })

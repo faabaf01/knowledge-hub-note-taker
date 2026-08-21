@@ -8,6 +8,10 @@ export function useCreateNote() {
     return useMutation({
       mutationFn: createNoteApi,
 
+      // onSuccess: async () => {
+      //   queryClient.invalidateQueries({ queryKey: ["notes"] });
+      // },
+
       // Step 1: Triggered the exact millisecond the user clicks "Save Note"
       onMutate: async (newNoteVariables: CreateNoteInput) => {
         // Cancel any outgoing refethches so they don't overwrite our optimistic addition
@@ -49,8 +53,8 @@ export function useCreateNote() {
       },
 
       // Step 3: Always synchronize cache with actual database state on final resolution
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onSettled: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["notes"] });
       },
     });
 }
