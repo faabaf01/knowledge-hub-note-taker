@@ -4,7 +4,8 @@ import { useCreateNote } from "@/features/notes/hooks/useCreateNote";
 import { useNotes } from "@/features/notes/hooks/useNotes";
 import { useEffect, useState } from "react";
 import NoteCard from "./components/NoteCard";
-import { PuffLoader, FadeLoader, ClipLoader } from "react-spinners";
+import { MoonLoader } from "react-spinners";
+import Sidebar from "./components/Sidebar";
 
 type NoteForm = {
   title: string;
@@ -16,6 +17,7 @@ const emptyForm = (): NoteForm => ({ title: "", content: "" });
 export default function Home() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [form, setForm] = useState({ title: "", content: "" });
+  const [isOpen, setIsOpen] = useState(false);
 
   const { mutate, isPending, isError } = useCreateNote();
 
@@ -79,25 +81,13 @@ export default function Home() {
 
   const { data: notes, isLoading, error, isFetching } = useNotes();
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center align-middle p-6">
-  //       <p>Loading...</p>
-  //     </div>
-  //   );
-  // }
-
-  // if (error) {
-  //   return <p>Something went wrong.</p>;
-  // }
-
   const isDark = theme === "dark";
   const shellClasses = isDark
     ? "min-h-screen bg-slate-950 px-4 py-10 text-slate-100 sm:px-6 lg:px-8"
     : "min-h-screen bg-slate-100 px-4 py-10 text-slate-900 sm:px-6 lg:px-8";
   const headerClasses = isDark
-    ? "rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/20 backdrop-blur"
-    : "rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 backdrop-blur";
+    ? "sticky top-4 z-20 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/20 backdrop-blur"
+    : "sticky top-4 z-20 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 backdrop-blur";
   const formClasses = isDark
     ? "rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20"
     : "rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60";
@@ -127,9 +117,18 @@ export default function Home() {
 
   return (
     <main className={shellClasses}>
-      <div className="mx-auto flex max-w-5xl flex-col gap-8">
+      {/* <div className="flex mx-auto max-w-6xl gap-8"> */}
+      <Sidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <div className={`mx-auto flex flex-col gap-8 transition-all duration-200 max-w-6xl`}>
         <header className={headerClasses}>
           <div className="flex flex-wrap items-start justify-between gap-4">
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className={`rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
+            >
+              {isOpen ? "Close Sidebar" : "Open Sidebar"}
+            </button>
             <div className="space-y-3">
               <p className="text-md font-semibold uppercase tracking-[0.3em] text-cyan-500">
                 Knowledge Hub
@@ -210,8 +209,8 @@ export default function Home() {
           </div>
 
           {isFetching && (
-            <div className="flex justify-center align-middle p-6 gap-2">
-              <PuffLoader color={isDark ? "#ffffff" : "#000000"} size={30} />
+            <div className="flex justify-center items-center p-6 gap-2">
+              <MoonLoader color={isDark ? "#ffffff" : "#000000"} size={30} />
               <p className="text-gray-500">Loading...</p>
             </div>
           )}
@@ -241,6 +240,7 @@ export default function Home() {
           )}
         </section>
       </div>
+      {/* </div> */}
     </main>
   );
 }
