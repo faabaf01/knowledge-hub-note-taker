@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import NoteCard from "./components/NoteCard";
 import { MoonLoader } from "react-spinners";
 import Sidebar from "./components/Sidebar";
+import Toolbar from "./components/Toolbar";
+import { useFolderNote } from "@/features/notes/hooks/useFolderNote";
+// import { useFolders } from "@/features/notes/hooks/useFolders";
 
 type NoteForm = {
   title: string;
@@ -18,8 +21,18 @@ export default function Home() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [form, setForm] = useState({ title: "", content: "" });
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
 
   const { mutate, isPending, isError } = useCreateNote();
+  const {
+    data: notes,
+    isLoading: isNotesLoading,
+    error,
+    isFetching,
+  } = useNotes();
+  const { data: folderNotes, isLoading: isFoldersLoading } = useFolderNote(
+    selectedFolderId ?? "",
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -79,15 +92,13 @@ export default function Home() {
   //   window.localStorage.setItem("notes", JSON.stringify(notes));
   // }, [notes]);
 
-  const { data: notes, isLoading, error, isFetching } = useNotes();
-
   const isDark = theme === "dark";
   const shellClasses = isDark
     ? "min-h-screen bg-slate-950 px-4 py-10 text-slate-100 sm:px-6 lg:px-8"
     : "min-h-screen bg-slate-100 px-4 py-10 text-slate-900 sm:px-6 lg:px-8";
   const headerClasses = isDark
-    ? "sticky top-4 z-20 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/20 backdrop-blur"
-    : "sticky top-4 z-20 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 backdrop-blur";
+    ? "z-20 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/20 backdrop-blur"
+    : "z-20 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 backdrop-blur";
   const formClasses = isDark
     ? "rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20"
     : "rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60";
@@ -111,24 +122,34 @@ export default function Home() {
   const actionButtonClasses = isDark
     ? "rounded-full border border-cyan-400/40 px-3 py-1 text-sm text-cyan-300 transition hover:bg-cyan-400/40 cursor-pointer"
     : "rounded-full border border-cyan-500/40 px-3 py-1 text-sm text-cyan-600 transition hover:bg-cyan-200 cursor-pointer";
-  const deleteButtonClasses = isDark
-    ? "rounded-full border border-rose-400/40 px-3 py-1 text-sm text-rose-300 transition hover:bg-rose-400/40 cursor-pointer"
-    : "rounded-full border border-rose-500/40 px-3 py-1 text-sm text-rose-600 transition hover:bg-rose-200 cursor-pointer";
 
   return (
     <main className={shellClasses}>
-      {/* <div className="flex mx-auto max-w-6xl gap-8"> */}
-      <Sidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
-      <div className={`mx-auto flex flex-col gap-8 transition-all duration-200 max-w-6xl`}>
+      <Sidebar
+        isOpen={isOpen}
+        isDark={isDark}
+        onClose={() => setIsOpen(false)}
+        selectedFolderId={selectedFolderId}
+        onSelectFolder={(folderId) => {
+          setSelectedFolderId(folderId);
+          setIsOpen(false);
+        }}
+      />
+      <div
+        className={`mx-auto flex max-w-5xl flex-col gap-8 transition-all duration-200 ${
+          isOpen ? "lg:pl-64" : "pl-0"
+        }`}
+        // className={`mx-auto flex flex-col gap-8 transition-all duration-200 max-w-6xl`}
+      >
         <header className={headerClasses}>
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <button
+            {/* <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
               className={`rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
             >
-              {isOpen ? "Close Sidebar" : "Open Sidebar"}
-            </button>
+              {isOpen ? "Close Folders" : "Open Folders"}
+            </button> */}
             <div className="space-y-3">
               <p className="text-md font-semibold uppercase tracking-[0.3em] text-cyan-500">
                 Knowledge Hub
@@ -144,7 +165,7 @@ export default function Home() {
               </p>
             </div>
 
-            <button
+            {/* <button
               type="button"
               onClick={() =>
                 setTheme((currentTheme) =>
@@ -154,11 +175,18 @@ export default function Home() {
               className={`rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
             >
               {isDark ? "☀️ Light" : "🌙 Dark"}
-            </button>
+            </button> */}
           </div>
         </header>
 
-        <form onSubmit={handleSubmit} className={formClasses}>
+        <Toolbar
+          isOpen={isOpen}
+          onToggleSidebar={() => setIsOpen(!isOpen)}
+          isDark={isDark}
+          onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
+        />
+
+        {/* <form onSubmit={handleSubmit} className={formClasses}>
           <div className="space-y-4">
             <input
               name="title"
@@ -198,13 +226,36 @@ export default function Home() {
               Clear
             </button>
           </div>
-        </form>
+        </form> */}
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold">Folder notes</h2>
+          {isFoldersLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <MoonLoader size={30} color="#365cd7" />
+            </div>
+          ) : folderNotes && folderNotes.length > 0 ? (
+            folderNotes.map((note) => (
+              <div key={note.id} className="border rounded-lg p-4 mb-4">
+                <div className="flex flex-row justify-between">
+                  <div>
+                    <h2 className="font-semibold">{note.title}</h2>
+                    <p>{note.content}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No notes found for this folder.</p>
+          )}
+        </section>
 
-        <section className="space-y-6">
+        <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Your notes</h2>
             <span className={pillClasses}>
-              {notes?.length} {notes?.length === 1 ? "note" : "notes"}
+              {isNotesLoading
+                ? "..."
+                : `${notes?.length || 0} ${notes?.length === 1 ? "note" : "notes"}`}
             </span>
           </div>
 
@@ -231,6 +282,7 @@ export default function Home() {
                 return (
                   <NoteCard
                     key={note.id}
+                    isDark={isDark}
                     note={note}
                     cardClasses={cardClasses}
                   />
@@ -240,7 +292,6 @@ export default function Home() {
           )}
         </section>
       </div>
-      {/* </div> */}
     </main>
   );
 }

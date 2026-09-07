@@ -6,10 +6,11 @@ import { useUpdateNote } from '@/features/notes/hooks/useUpdateNote';
 
 interface NoteCardProps {
   note: Note;
+  isDark: boolean;
   cardClasses?: string;
 }
 
-const NoteCard = ({ note, cardClasses }: NoteCardProps) => {
+const NoteCard = ({ note, cardClasses, isDark }: NoteCardProps) => {
   const { mutate: deleteNote } = useDeleteNote();
   const { mutate: updateNote } = useUpdateNote();
 
@@ -20,6 +21,9 @@ const NoteCard = ({ note, cardClasses }: NoteCardProps) => {
   });
 
   // const isOptimistic = String(note.id).startsWith("temp-");
+  const deleteButtonClasses = isDark
+    ? "rounded-full border border-rose-400/40 px-3 py-1 text-sm text-rose-300 transition hover:bg-rose-400/40 cursor-pointer"
+    : "rounded-full border border-rose-500/40 px-3 py-1 text-sm text-rose-600 transition hover:bg-rose-200 cursor-pointer";
 
   const handleSave = () => {
     if (!editForm.title.trim() || !editForm.content.trim()) return;
@@ -81,7 +85,7 @@ const NoteCard = ({ note, cardClasses }: NoteCardProps) => {
           <button
             onClick={() => deleteNote(note.id)}
             // disabled={isOptimistic} // prevent deleting an item that hasn't saved yet
-            // className={deleteButtonClasses}
+            className={deleteButtonClasses}
           >
             Delete
           </button>
