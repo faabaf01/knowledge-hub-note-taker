@@ -4,10 +4,12 @@ import { useCreateNote } from "@/features/notes/hooks/useCreateNote";
 import { useNotes } from "@/features/notes/hooks/useNotes";
 import { useEffect, useState } from "react";
 import NoteCard from "./components/NoteCard";
-import { MoonLoader } from "react-spinners";
+import { BeatLoader } from "react-spinners";
 import Sidebar from "./components/Sidebar";
 import Toolbar from "./components/Toolbar";
 import { useFolderNote } from "@/features/notes/hooks/useFolderNote";
+import { useFolders } from "@/features/notes/hooks/useFolders";
+import { useCreateFolder } from "@/features/notes/hooks/useCreateFolder";
 // import { useFolders } from "@/features/notes/hooks/useFolders";
 
 type NoteForm = {
@@ -23,14 +25,20 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
 
+  const {
+    mutate: createFolder,
+    isPending: isCreatingFolder,
+    isError: isCreatingFolderError,
+  } = useCreateFolder();
   const { mutate, isPending, isError } = useCreateNote();
+  
   const {
     data: notes,
     isLoading: isNotesLoading,
     error,
     isFetching,
   } = useNotes();
-  const { data: folderNotes, isLoading: isFoldersLoading } = useFolderNote(
+  const { data: folderNotes, isLoading: isFolderNoteLoading } = useFolderNote(
     selectedFolderId ?? "",
   );
 
@@ -54,6 +62,11 @@ export default function Home() {
 
     // 2. Clear local form inputs immediately
     setForm({ title: "", content: "" });
+  };
+
+  const handleCreateFolder = (name: string) => {
+    if (!name.trim()) return;
+    createFolder({ name: name.trim() });
   };
 
   useEffect(() => {
@@ -134,6 +147,7 @@ export default function Home() {
           setSelectedFolderId(folderId);
           setIsOpen(false);
         }}
+        onCreateFolder={handleCreateFolder}
       />
       <div
         className={`mx-auto flex max-w-5xl flex-col gap-8 transition-all duration-200 ${
@@ -164,18 +178,6 @@ export default function Home() {
                 longer needed.
               </p>
             </div>
-
-            {/* <button
-              type="button"
-              onClick={() =>
-                setTheme((currentTheme) =>
-                  currentTheme === "dark" ? "light" : "dark",
-                )
-              }
-              className={`rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
-            >
-              {isDark ? "☀️ Light" : "🌙 Dark"}
-            </button> */}
           </div>
         </header>
 
@@ -184,6 +186,7 @@ export default function Home() {
           onToggleSidebar={() => setIsOpen(!isOpen)}
           isDark={isDark}
           onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
+          onNewNote={() => setForm({ title: "", content: "" })}
         />
 
         {/* <form onSubmit={handleSubmit} className={formClasses}>
@@ -229,9 +232,9 @@ export default function Home() {
         </form> */}
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Folder notes</h2>
-          {isFoldersLoading ? (
+          {isFolderNoteLoading ? (
             <div className="flex h-full items-center justify-center">
-              <MoonLoader size={30} color="#365cd7" />
+              <BeatLoader size={15} color="#165f78" />
             </div>
           ) : folderNotes && folderNotes.length > 0 ? (
             folderNotes.map((note) => (
@@ -260,9 +263,8 @@ export default function Home() {
           </div>
 
           {isFetching && (
-            <div className="flex justify-center items-center p-6 gap-2">
-              <MoonLoader color={isDark ? "#ffffff" : "#000000"} size={30} />
-              <p className="text-gray-500">Loading...</p>
+            <div className="flex flex-col justify-center items-center p-6 gap-2">
+              <BeatLoader color={"#165f78"} size={15} />
             </div>
           )}
           {error && (

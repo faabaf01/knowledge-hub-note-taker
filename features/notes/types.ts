@@ -25,3 +25,7 @@ export interface FolderNotes {
   updatedAt: string;
   folderId: string;
 }
+
+export interface CreateFolderInput {
+  name: string;
+}

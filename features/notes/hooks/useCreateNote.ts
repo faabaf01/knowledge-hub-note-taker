@@ -14,7 +14,7 @@ export function useCreateNote() {
 
       // Step 1: Triggered the exact millisecond the user clicks "Save Note"
       onMutate: async (newNoteVariables: CreateNoteInput) => {
-        // Cancel any outgoing refethches so they don't overwrite our optimistic addition
+        // Cancel any outgoing refetches so they don't overwrite our optimistic addition
         await queryClient.cancelQueries({ queryKey: ["notes"] });
 
         // Snapshot the current state of the notes list cache
