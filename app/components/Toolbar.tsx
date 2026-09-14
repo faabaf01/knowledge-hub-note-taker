@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 
 interface ToolbarProps {
-  isOpen: boolean;
+  sidebarIsOpen: boolean;
   isDark: boolean;
   onToggleSidebar: () => void;
   onToggleTheme: () => void;
@@ -22,7 +22,7 @@ const formatTime = (totalSeconds: number) => {
 };
 
 const Toolbar = ({
-  isOpen,
+  sidebarIsOpen,
   isDark,
   onToggleSidebar,
   onToggleTheme,
@@ -35,13 +35,18 @@ const Toolbar = ({
 
   const buttonClasses = `rounded-full px-4 py-2 text-sm text-white font-semibold cursor-pointer transition ${
     isDark
-      ? "bg-cyan-400/70 hover:bg-cyan-400/80 text-white"
-      : "bg-cyan-400 hover:bg-cyan-200"
+      ? "bg-cyan-500/70 hover:bg-cyan-500/80 text-white"
+      : "bg-cyan-500 hover:bg-cyan-600 text-white"
+  }`;
+  const timerButtonClasses = `rounded-full px-4 py-2 text-sm text-white font-semibold cursor-pointer transition ${
+    isDark
+      ? "bg-purple-500/70 hover:bg-purple-500/80 text-white"
+      : "bg-purple-500 hover:bg-purple-600 text-white"
   }`;
 
   const timerBadgeClasses = isDark
-    ? "rounded-full border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-sm text-cyan-200"
-    : "rounded-full border border-cyan-500/30 bg-cyan-100 px-3 py-2 text-sm text-cyan-700";
+    ? "rounded-full border border-purple-400/40 bg-purple-500/10 px-3 py-2 text-sm text-purple-200"
+    : "rounded-full border border-purple-500/30 bg-purple-100 px-3 py-2 text-sm text-purple-700";
 
   useEffect(() => {
     if (!isTimerRunning) return;
@@ -103,16 +108,18 @@ const Toolbar = ({
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div
+        className={`flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-4 py-3 ${isDark ? "border-white/15 dark:bg-white/10" : "border-gray-200 bg-white"}`}
+      >
         <button
           type="button"
           onClick={onToggleSidebar}
           className={buttonClasses}
         >
-          {isOpen ? "Close Folders" : "Open Folders"}
+          {sidebarIsOpen ? "Close Folders" : "Open Folders"}
         </button>
 
-        <div className="flex flex-wrap items-center gap-3">
+        {/* <div className="flex flex-wrap items-center gap-3">
           <div className={timerBadgeClasses}>
             <span className="font-semibold">
               {timerLabel}: {formatTime(timeLeft)}
@@ -121,19 +128,32 @@ const Toolbar = ({
           <span className="text-xs uppercase tracking-[0.2em] text-gray-500">
             {completedCycles}/{TOTAL_CYCLES} cycles
           </span>
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-4">
-          <button type="button" onClick={handleStartTimer} className={buttonClasses}>
-            {isTimerRunning ? "Pause Timer" : "Start Timer"}
-          </button>
-          <button type="button" onClick={resetTimer} className={buttonClasses}>
-            Reset
-          </button>
+          {/* <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleStartTimer}
+              className={timerButtonClasses}
+            >
+              {isTimerRunning ? "Pause Timer" : "Start Timer"}
+            </button>
+            <button
+              type="button"
+              onClick={resetTimer}
+              className={timerButtonClasses}
+            >
+              Reset
+            </button>
+          </div> */}
+
+          <div className="h-5 w-px bg-slate-300 dark:bg-white/20" />
           <button type="button" onClick={onNewNote} className={buttonClasses}>
             + New Note
           </button>
-          <span className="text-sm text-gray-500">|</span>
+
+          <div className="h-5 w-px bg-slate-300 dark:bg-white/20" />
 
           <button
             type="button"

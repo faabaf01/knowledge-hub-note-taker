@@ -8,9 +8,10 @@ import { BeatLoader } from "react-spinners";
 import Sidebar from "./components/Sidebar";
 import Toolbar from "./components/Toolbar";
 import { useFolderNote } from "@/features/notes/hooks/useFolderNote";
-import { useFolders } from "@/features/notes/hooks/useFolders";
 import { useCreateFolder } from "@/features/notes/hooks/useCreateFolder";
-// import { useFolders } from "@/features/notes/hooks/useFolders";
+import Header from "./components/Header";
+import StudyTimer from "./components/StudyTimer";
+import NewNoteForm from "./components/NewNoteForm";
 
 type NoteForm = {
   title: string;
@@ -22,8 +23,9 @@ const emptyForm = (): NoteForm => ({ title: "", content: "" });
 export default function Home() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [form, setForm] = useState({ title: "", content: "" });
-  const [isOpen, setIsOpen] = useState(false);
+  const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
 
   const {
     mutate: createFolder,
@@ -109,16 +111,12 @@ export default function Home() {
   const shellClasses = isDark
     ? "min-h-screen bg-slate-950 px-4 py-10 text-slate-100 sm:px-6 lg:px-8"
     : "min-h-screen bg-slate-100 px-4 py-10 text-slate-900 sm:px-6 lg:px-8";
-  const headerClasses = isDark
-    ? "z-20 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/20 backdrop-blur"
-    : "z-20 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 backdrop-blur";
   const formClasses = isDark
     ? "rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20"
     : "rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60";
   const inputClasses = isDark
     ? "w-full rounded-2xl border border-white/10 bg-slate-800 px-4 py-3 text-sm outline-none ring-0 placeholder:text-slate-400 focus:border-cyan-400"
     : "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none ring-0 placeholder:text-slate-400 focus:border-cyan-500";
-  const mutedTextClasses = isDark ? "text-slate-300" : "text-slate-600";
   const subtleTextClasses = isDark ? "text-slate-400" : "text-slate-500";
   const cardClasses = isDark
     ? "rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-lg shadow-black/20"
@@ -139,97 +137,30 @@ export default function Home() {
   return (
     <main className={shellClasses}>
       <Sidebar
-        isOpen={isOpen}
+        sidebarIsOpen={sidebarIsOpen}
         isDark={isDark}
-        onClose={() => setIsOpen(false)}
+        onClose={() => setSidebarIsOpen(false)}
         selectedFolderId={selectedFolderId}
         onSelectFolder={(folderId) => {
           setSelectedFolderId(folderId);
-          setIsOpen(false);
+          setSidebarIsOpen(false);
         }}
         onCreateFolder={handleCreateFolder}
       />
       <div
         className={`mx-auto flex max-w-5xl flex-col gap-8 transition-all duration-200 ${
-          isOpen ? "lg:pl-64" : "pl-0"
+          sidebarIsOpen ? "lg:pl-64" : "pl-0"
         }`}
-        // className={`mx-auto flex flex-col gap-8 transition-all duration-200 max-w-6xl`}
       >
-        <header className={headerClasses}>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            {/* <button
-              type="button"
-              onClick={() => setIsOpen(!isOpen)}
-              className={`rounded-full px-4 py-2 text-sm font-medium cursor-pointer transition ${isDark ? "bg-white/15 text-slate-100 hover:bg-white/20" : "bg-slate-900 text-white hover:bg-slate-800"}`}
-            >
-              {isOpen ? "Close Folders" : "Open Folders"}
-            </button> */}
-            <div className="space-y-3">
-              <p className="text-md font-semibold uppercase tracking-[0.3em] text-cyan-500">
-                Knowledge Hub
-              </p>
-              <h1 className="text-3xl font-semibold sm:text-4xl">
-                Create, edit, and organize your ideas.
-              </h1>
-              <p
-                className={`max-w-2xl text-sm sm:text-base ${mutedTextClasses}`}
-              >
-                Add a quick thought, update it later, or remove it when it is no
-                longer needed.
-              </p>
-            </div>
-          </div>
-        </header>
-
+        <Header isDark={isDark} />
         <Toolbar
-          isOpen={isOpen}
-          onToggleSidebar={() => setIsOpen(!isOpen)}
+          sidebarIsOpen={sidebarIsOpen}
+          onToggleSidebar={() => setSidebarIsOpen(!sidebarIsOpen)}
           isDark={isDark}
           onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
-          onNewNote={() => setForm({ title: "", content: "" })}
+          onNewNote={() => setIsCreatingNote(true)}
         />
 
-        {/* <form onSubmit={handleSubmit} className={formClasses}>
-          <div className="space-y-4">
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Note title"
-              className={inputClasses}
-              disabled={isPending}
-            />
-            <textarea
-              name="content"
-              value={form.content}
-              onChange={handleChange}
-              placeholder="Write your note here..."
-              rows={5}
-              className={inputClasses}
-              disabled={isPending}
-            />
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={isPending}
-              className={actionButtonClasses}
-            >
-              {isPending ? "Saving note..." : "Save Note"}
-            </button>
-            {isError && (
-              <p className="text-red-500 text-sm">Failed to save note.</p>
-            )}
-            <button
-              type="button"
-              onClick={() => setForm(emptyForm())}
-              className={buttonClasses}
-            >
-              Clear
-            </button>
-          </div>
-        </form> */}
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Folder notes</h2>
           {isFolderNoteLoading ? (
@@ -294,6 +225,60 @@ export default function Home() {
           )}
         </section>
       </div>
+
+      <div className="fixed bottom-6 right-6 z-50 w-56">
+        <div className={cardClasses}>
+          <StudyTimer />
+        </div>
+      </div>
+      {isCreatingNote && (
+        <NewNoteForm
+          folderId={selectedFolderId ?? ""}
+          onCancel={() => setIsCreatingNote(false)}
+          onSuccess={() => setIsCreatingNote(false)}
+        />
+      )}
+      {/* <form onSubmit={handleSubmit} className={formClasses}>
+          <div className="space-y-4">
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="Note title"
+              className={inputClasses}
+              disabled={isPending}
+            />
+            <textarea
+              name="content"
+              value={form.content}
+              onChange={handleChange}
+              placeholder="Write your note here..."
+              rows={5}
+              className={inputClasses}
+              disabled={isPending}
+            />
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={isPending}
+              className={actionButtonClasses}
+            >
+              {isPending ? "Saving note..." : "Save Note"}
+            </button>
+            {isError && (
+              <p className="text-red-500 text-sm">Failed to save note.</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setForm(emptyForm())}
+              className={buttonClasses}
+            >
+              Clear
+            </button>
+          </div>
+        </form> */}
     </main>
   );
 }

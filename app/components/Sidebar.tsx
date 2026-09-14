@@ -3,7 +3,7 @@ import { useFolders } from "@/features/notes/hooks/useFolders";
 import { BeatLoader } from "react-spinners";
 
 interface SidebarProps {
-  isOpen: boolean;
+  sidebarIsOpen: boolean;
   isDark: boolean;
   onClose: () => void;
   selectedFolderId: string | null;
@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({
-  isOpen,
+  sidebarIsOpen,
   onClose,
   selectedFolderId,
   onSelectFolder,
@@ -59,13 +59,13 @@ const Sidebar = ({
 
   return (
     <>
-      {isOpen && (
+      {sidebarIsOpen && (
         <div className="fixed inset-0 z-30 bg-black/40" onClick={onClose} />
       )}
 
       <aside
         className={`${asideClasses} ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarIsOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col justify-between">
