@@ -8,6 +8,7 @@ interface ToolbarProps {
   onToggleSidebar: () => void;
   onToggleTheme: () => void;
   onNewNote: () => void;
+  isNewNoteDisabled: boolean;
 }
 
 const STUDY_MINUTES = 25;
@@ -27,6 +28,7 @@ const Toolbar = ({
   onToggleSidebar,
   onToggleTheme,
   onNewNote,
+  isNewNoteDisabled,
 }: ToolbarProps) => {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isBreakMode, setIsBreakMode] = useState(false);
@@ -149,7 +151,17 @@ const Toolbar = ({
           </div> */}
 
           <div className="h-5 w-px bg-slate-300 dark:bg-white/20" />
-          <button type="button" onClick={onNewNote} className={buttonClasses}>
+          <button
+            type="button"
+            onClick={onNewNote}
+            title={
+              isNewNoteDisabled
+                ? "Please select a folder first"
+                : "Create a new note"
+            }
+            className={`${buttonClasses} ${isNewNoteDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={isNewNoteDisabled}
+          >
             + New Note
           </button>
 

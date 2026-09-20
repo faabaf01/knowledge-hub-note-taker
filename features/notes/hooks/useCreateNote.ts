@@ -2,18 +2,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNoteApi } from "../api/notes";
 import { CreateNoteInput, Note } from "../types";
 
+export interface CreateNoteVariables extends CreateNoteInput {
+  folderId: string;
+}
+
 export function useCreateNote() {
     const queryClient = useQueryClient()
 
     return useMutation({
-      mutationFn: createNoteApi,
+      mutationFn: ({ folderId, ...newNoteData }: CreateNoteVariables) =>
+        createNoteApi(newNoteData, folderId),
 
       // onSuccess: async () => {
       //   queryClient.invalidateQueries({ queryKey: ["notes"] });
       // },
 
       // Step 1: Triggered the exact millisecond the user clicks "Save Note"
-      onMutate: async (newNoteVariables: CreateNoteInput) => {
+      onMutate: async (newNoteVariables: CreateNoteVariables) => {
         // Cancel any outgoing refetches so they don't overwrite our optimistic addition
         await queryClient.cancelQueries({ queryKey: ["notes"] });
 
@@ -29,9 +34,9 @@ export function useCreateNote() {
         };
 
         // Optimistically insert the mock note into the top of the cache list
-        queryClient.setQueryData<Note[]>(["notes"], (oldNotes) => {
-          return oldNotes ? [optimisticNote, ...oldNotes] : [optimisticNote];
-        });
+        queryClient.setQueryData<Note[]>(["notes"], (oldNotes) =>
+          oldNotes ? [optimisticNote, ...oldNotes] : [optimisticNote],
+        );
 
         // Pass the previous list state down to the context object for rollback capability
         return { previousNotes };

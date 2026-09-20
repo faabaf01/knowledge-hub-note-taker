@@ -22,7 +22,7 @@ const Sidebar = ({
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  const { data: folders, isLoading: isFoldersLoading } = useFolders();
+  const { data: folders, isLoading: isFoldersLoading, error } = useFolders();
 
   const asideClasses = isDark
     ? "fixed left-0 top-0 z-40 h-screen w-70 shrink-0 transform border-r border-white/10 bg-slate-950 p-4 transition-transform duration-200 ease-in-out"
@@ -76,7 +76,8 @@ const Sidebar = ({
               Folders
             </h3>
             <button
-              className={buttonClasses}
+              className={`${buttonClasses} ${error ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={error ? true : false}
               onClick={() => setIsCreatingFolder(true)}
             >
               +

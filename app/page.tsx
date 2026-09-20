@@ -13,16 +13,8 @@ import Header from "./components/Header";
 import StudyTimer from "./components/StudyTimer";
 import NewNoteForm from "./components/NewNoteForm";
 
-type NoteForm = {
-  title: string;
-  content: string;
-};
-
-const emptyForm = (): NoteForm => ({ title: "", content: "" });
-
 export default function Home() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
-  const [form, setForm] = useState({ title: "", content: "" });
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
@@ -32,7 +24,6 @@ export default function Home() {
     isPending: isCreatingFolder,
     isError: isCreatingFolderError,
   } = useCreateFolder();
-  const { mutate, isPending, isError } = useCreateNote();
   
   const {
     data: notes,
@@ -44,31 +35,17 @@ export default function Home() {
     selectedFolderId ?? "",
   );
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!form.title.trim() || !form.content.trim()) return;
-
-    // 1. Submit payload to trigger the onMutate instant cache pipeline
-    mutate(form);
-
-    // 2. Clear local form inputs immediately
-    setForm({ title: "", content: "" });
-  };
-
   const handleCreateFolder = (name: string) => {
     if (!name.trim()) return;
     createFolder({ name: name.trim() });
+  };
+
+  const handleCreateNewNote = () => {
+    if (!selectedFolderId) {
+      alert("Please select a folder first.");
+      return;
+    }
+    setIsCreatingNote(true);
   };
 
   useEffect(() => {
@@ -158,7 +135,8 @@ export default function Home() {
           onToggleSidebar={() => setSidebarIsOpen(!sidebarIsOpen)}
           isDark={isDark}
           onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
-          onNewNote={() => setIsCreatingNote(true)}
+          onNewNote={handleCreateNewNote}
+          isNewNoteDisabled={!selectedFolderId}
         />
 
         <section className="space-y-4">
@@ -231,54 +209,13 @@ export default function Home() {
           <StudyTimer />
         </div>
       </div>
-      {isCreatingNote && (
+      {isCreatingNote && selectedFolderId && (
         <NewNoteForm
-          folderId={selectedFolderId ?? ""}
+          folderId={selectedFolderId}
           onCancel={() => setIsCreatingNote(false)}
           onSuccess={() => setIsCreatingNote(false)}
         />
       )}
-      {/* <form onSubmit={handleSubmit} className={formClasses}>
-          <div className="space-y-4">
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Note title"
-              className={inputClasses}
-              disabled={isPending}
-            />
-            <textarea
-              name="content"
-              value={form.content}
-              onChange={handleChange}
-              placeholder="Write your note here..."
-              rows={5}
-              className={inputClasses}
-              disabled={isPending}
-            />
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={isPending}
-              className={actionButtonClasses}
-            >
-              {isPending ? "Saving note..." : "Save Note"}
-            </button>
-            {isError && (
-              <p className="text-red-500 text-sm">Failed to save note.</p>
-            )}
-            <button
-              type="button"
-              onClick={() => setForm(emptyForm())}
-              className={buttonClasses}
-            >
-              Clear
-            </button>
-          </div>
-        </form> */}
     </main>
   );
 }

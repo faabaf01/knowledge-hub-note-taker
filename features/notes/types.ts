@@ -5,11 +5,6 @@ export interface Note {
   createdAt: string;
 }
 
-export interface CreateNoteInput {
-  title: string;
-  content: string;
-}
-
 export interface Folder {
   id: string;
   name: string;
@@ -28,4 +23,9 @@ export interface FolderNotes {
 
 export interface CreateFolderInput {
   name: string;
+}
+
+export interface CreateNoteInput {
+  title: string;
+  content: string;
 }

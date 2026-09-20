@@ -15,7 +15,7 @@ export async function getFoldersNoteApi(
 ): Promise<FolderNotes[]> {
   const response = await fetch(`${API_URL}/folders/${folderId}/notes`);
   if (!response.ok) {
-    throw new Error("Failed to fetch notes from the API.");
+    throw new Error("Failed to fetch notes for this folder from the API.");
   }
   return response.json();
 }

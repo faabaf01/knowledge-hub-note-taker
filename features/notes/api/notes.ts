@@ -10,8 +10,11 @@ export async function getNotesApi(): Promise<Note[]> {
   return response.json();
 }
 
-export async function createNoteApi(newNote: CreateNoteInput): Promise<Note> {
-  const response = await fetch(`${API_URL}/notes`, {
+export async function createNoteApi(
+  newNote: CreateNoteInput,
+  folderId: string,
+): Promise<Note> {
+  const response = await fetch(`${API_URL}/folders/${folderId}/notes`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

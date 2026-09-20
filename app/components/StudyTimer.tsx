@@ -15,34 +15,34 @@ const StudyTimer = () => {
         if (!isTimerRunning) return;
 
         const timer = window.setInterval(() => {
-        setTimeLeft((currentTime) => {
+          setTimeLeft((currentTime) => {
             if (currentTime > 1) {
-            return currentTime - 1;
+              return currentTime - 1;
             }
 
             if (isBreakMode) {
-            setIsBreakMode(false);
-            setTimeLeft(STUDY_MINUTES * 60);
-            return STUDY_MINUTES * 60;
+              setIsBreakMode(false);
+              setTimeLeft(STUDY_MINUTES * 60);
+              return STUDY_MINUTES * 60;
             }
 
             setCompletedCycles((cycleCount) => {
-            const nextCycle = cycleCount + 1;
+              const nextCycle = cycleCount + 1;
 
-            if (nextCycle >= TOTAL_CYCLES) {
+              if (nextCycle >= TOTAL_CYCLES) {
                 setIsTimerRunning(false);
                 setIsBreakMode(false);
                 setTimeLeft(STUDY_MINUTES * 60);
                 return TOTAL_CYCLES;
-            }
+              }
 
-            setIsBreakMode(true);
-            return nextCycle;
+              setIsBreakMode(true);
+              return nextCycle;
             });
 
             setTimeLeft(BREAK_MINUTES * 60);
             return BREAK_MINUTES * 60;
-        });
+          });
         }, 1000);
 
         return () => window.clearInterval(timer);
