@@ -7,7 +7,7 @@ interface SidebarProps {
   isDark: boolean;
   onClose: () => void;
   selectedFolderId: string | null;
-  onSelectFolder: (folderId: string) => void;
+  onSelectFolder: (folderId: string | null) => void;
   onCreateFolder: (name: string) => void;
 }
 
@@ -80,7 +80,7 @@ const Sidebar = ({
               disabled={error ? true : false}
               onClick={() => setIsCreatingFolder(true)}
             >
-              +
+              Add Folder
             </button>
           </div>
           {isCreatingFolder && (
@@ -112,17 +112,28 @@ const Sidebar = ({
             {isFoldersLoading ? (
               <BeatLoader size={15} color="#165f78" />
             ) : folders && folders.length > 0 ? (
-              folders?.map((folder) => (
+              <>
                 <li
-                  key={folder.id}
-                  onClick={() => onSelectFolder(folder.id)}
+                  onClick={() => onSelectFolder(null)}
                   className={`${folderItemClasses} ${
-                    selectedFolderId === folder.id ? folderActiveClasses : ""
+                    selectedFolderId === null ? folderActiveClasses : ""
                   }`}
                 >
-                  {folder.name}
+                  All Notes
                 </li>
-              ))
+
+                {folders?.map((folder) => (
+                  <li
+                    key={folder.id}
+                    onClick={() => onSelectFolder(folder.id)}
+                    className={`${folderItemClasses} ${
+                      selectedFolderId === folder.id ? folderActiveClasses : ""
+                    }`}
+                  >
+                    {folder.name}
+                  </li>
+                ))}
+              </>
             ) : (
               <li className={emptyTextClasses}>No folders available</li>
             )}

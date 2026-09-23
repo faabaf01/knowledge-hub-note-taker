@@ -19,11 +19,20 @@ export function useCreateNote() {
 
       // Step 1: Triggered the exact millisecond the user clicks "Save Note"
       onMutate: async (newNoteVariables: CreateNoteVariables) => {
-        // Cancel any outgoing refetches so they don't overwrite our optimistic addition
+        const { folderId } = newNoteVariables;
+
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries({ queryKey: ["notes"] });
+        await queryClient.cancelQueries({
+          queryKey: ["folder-notes", folderId],
+        });
 
         // Snapshot the current state of the notes list cache
         const previousNotes = queryClient.getQueryData<Note[]>(["notes"]);
+        const previousFolderNotes = queryClient.getQueryData<Note[]>([
+          "folder-notes",
+          folderId,
+        ]);
 
         // Generate a temporary mock note structure to show on the screen instantly
         const optimisticNote: Note = {
@@ -38,8 +47,16 @@ export function useCreateNote() {
           oldNotes ? [optimisticNote, ...oldNotes] : [optimisticNote],
         );
 
+        queryClient.setQueryData<Note[]>(
+          ["folder-notes", folderId],
+          (oldFolderNotes) =>
+            oldFolderNotes
+              ? [optimisticNote, ...oldFolderNotes]
+              : [optimisticNote],
+        );
+
         // Pass the previous list state down to the context object for rollback capability
-        return { previousNotes };
+        return { previousNotes, previousFolderNotes, folderId };
       },
 
       // //Refresh the active notes list automatically upon success
@@ -50,16 +67,25 @@ export function useCreateNote() {
       // },
 
       // Step 2: Roll back the UI cache if the fake API throws an unexpected error
-      onError: (err, newNoteVariables, context) => {
+      onError: (err, _newNoteVariables, context) => {
         if (context?.previousNotes) {
           queryClient.setQueryData(["notes"], context.previousNotes);
-          alert(`Failed to save note. UI rolled back! Details: ${err.message}`);
         }
+        if (context?.previousFolderNotes && context?.folderId) {
+          queryClient.setQueryData(
+            ["folder-notes", context.folderId],
+            context.previousFolderNotes,
+          );
+        }
+        alert(`Failed to save note. UI rolled back! Details: ${err.message}`);
       },
 
       // Step 3: Always synchronize cache with actual database state on final resolution
-      onSettled: async () => {
+      onSettled: async (_data, _error, newNoteVariables) => {
         await queryClient.invalidateQueries({ queryKey: ["notes"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["folder-notes", newNoteVariables.folderId],
+        });
       },
     });
 }

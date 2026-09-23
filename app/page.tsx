@@ -29,7 +29,7 @@ export default function Home() {
     data: notes,
     isLoading: isNotesLoading,
     error,
-    isFetching,
+    isNotesFetching,
   } = useNotes();
   const { data: folderNotes, isLoading: isFolderNoteLoading } = useFolderNote(
     selectedFolderId ?? "",
@@ -139,15 +139,20 @@ export default function Home() {
           isNewNoteDisabled={!selectedFolderId}
         />
 
-        <section className="space-y-4">
+        {/* <section className="space-y-4">
           <h2 className="text-xl font-semibold">Folder notes</h2>
-          {isFolderNoteLoading ? (
+
+          {selectedFolderId === null ? (
+            <p className="text-gray-500">
+              Please select a folder to view its notes.
+            </p>
+          ) : isFolderNoteLoading ? (
             <div className="flex h-full items-center justify-center">
               <BeatLoader size={15} color="#165f78" />
             </div>
           ) : folderNotes && folderNotes.length > 0 ? (
             folderNotes.map((note) => (
-              <div key={note.id} className="border rounded-lg p-4 mb-4">
+              <div key={note.id} className="mb-4 rounded-lg border p-4">
                 <div className="flex flex-row justify-between">
                   <div>
                     <h2 className="font-semibold">{note.title}</h2>
@@ -159,46 +164,65 @@ export default function Home() {
           ) : (
             <p className="text-gray-500">No notes found for this folder.</p>
           )}
-        </section>
+        </section> */}
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Your notes</h2>
-            <span className={pillClasses}>
-              {isNotesLoading
-                ? "..."
-                : `${notes?.length || 0} ${notes?.length === 1 ? "note" : "notes"}`}
-            </span>
+            <h2 className="text-xl font-semibold">
+              {selectedFolderId === null ? "All notes" : "Folder notes"}
+            </h2>
+            {selectedFolderId === null && (
+              <span className={pillClasses}>
+                {isNotesLoading
+                  ? "..."
+                  : `${notes?.length || 0} ${notes?.length === 1 ? "note" : "notes"}`}
+              </span>
+            )}
           </div>
 
-          {isFetching && (
-            <div className="flex flex-col justify-center items-center p-6 gap-2">
-              <BeatLoader color={"#165f78"} size={15} />
-            </div>
-          )}
-          {error && (
-            <div className="flex justify-center align-middle p-6">
-              <p className="text-gray-500">
-                Something went wrong! Please try again later.
-              </p>
-            </div>
-          )}
-          {notes?.length === 0 ? (
-            <div className={emptyStateClasses}>
-              No notes yet. Start by creating one.
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {notes?.map((note) => {
-                return (
+          {selectedFolderId === null ? (
+            // ---- ALL NOTES VIEW ----
+            isNotesLoading ? (
+              <div className="flex items-center justify-center p-6">
+                <BeatLoader size={15} color="#165f78" />
+              </div>
+            ) : error ? (
+              <div className="flex justify-center p-6">
+                <p className="text-gray-500">
+                  Something went wrong! Please try again later.
+                </p>
+              </div>
+            ) : notes && notes.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {notes?.map((note) => (
                   <NoteCard
                     key={note.id}
                     isDark={isDark}
                     note={note}
                     cardClasses={cardClasses}
                   />
-                );
-              })}
+                ))}
+              </div>
+            ) : (
+              <div className={emptyStateClasses}>
+                No notes yet. Select a folder to add one.
+              </div>
+            )
+          ) : // ---- SINGLE FOLDER VIEW ----
+          isFolderNoteLoading ? (
+            <div className="flex items-center justify-center p-6">
+              <BeatLoader size={15} color="#165f78" />
+            </div>
+          ) : folderNotes && folderNotes.length > 0 ? (
+            folderNotes?.map((note) => (
+              <div key={note.id} className="mb-4 rounded-lg border p-4">
+                <h3 className="font-semibold">{note.title}</h3>
+                <p>{note.content}</p>
+              </div>
+            ))
+          ) : (
+            <div className={emptyStateClasses}>
+              No notes found for this folder.
             </div>
           )}
         </section>
