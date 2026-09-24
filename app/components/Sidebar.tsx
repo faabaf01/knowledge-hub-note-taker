@@ -28,11 +28,11 @@ const Sidebar = ({
     ? "fixed left-0 top-0 z-40 h-screen w-70 shrink-0 transform border-r border-white/10 bg-slate-950 p-4 transition-transform duration-200 ease-in-out"
     : "fixed left-0 top-0 z-40 h-screen w-70 shrink-0 transform border-r border-slate-200 bg-white p-4 transition-transform duration-200 ease-in-out";
   const titleClasses = isDark ? "text-gray-200" : "text-gray-800";
-  const buttonClasses = `rounded-full px-4 py-2 text-sm text-white font-semibold cursor-pointer transition ${
-    isDark
-      ? "bg-cyan-400/70 hover:bg-cyan-400/80 text-white"
-      : "bg-cyan-400 hover:bg-cyan-200"
-  }`;
+    const buttonClasses = `rounded-full px-4 py-2 text-sm text-white font-semibold cursor-pointer transition ${
+      isDark
+        ? "bg-cyan-500/70 hover:bg-cyan-500/80 text-white"
+        : "bg-cyan-500 hover:bg-cyan-600 text-white"
+    }`;
   const folderItemClasses = isDark
     ? "text-gray-300 hover:bg-gray-600 cursor-pointer"
     : "text-gray-700 hover:bg-cyan-200 cursor-pointer";
